@@ -1,0 +1,15 @@
+[Unit]
+Description=ExpenseTracker Spring Boot Application
+After=network.target
+
+[Service]
+Type=simple
+User=expense-tracker
+WorkingDirectory={{ app_directory }}
+Environment=SERVER_PORT={{ app_port }}
+ExecStart=/usr/bin/java -jar {{ app_directory }}/{{ app_jar_name }}
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

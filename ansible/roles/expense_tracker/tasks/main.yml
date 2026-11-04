@@ -1,0 +1,45 @@
+---
+- name: Install Java 17
+  ansible.builtin.apt:
+    name: openjdk-17-jre-headless
+    state: present
+    update_cache: yes
+
+- name: Create application user
+  ansible.builtin.user:
+    name: expense-tracker
+    system: yes
+    create_home: no
+    shell: /usr/sbin/nologin
+    state: present
+
+- name: Create application directory
+  ansible.builtin.file:
+    path: "{{ app_directory }}"
+    state: directory
+    owner: expense-tracker
+    group: expense-tracker
+    mode: '0755'
+
+- name: Copy application JAR
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../target/expense_tracker-0.0.1-SNAPSHOT.jar"
+    dest: "{{ app_directory }}/{{ app_jar_name }}"
+    owner: expense-tracker
+    group: expense-tracker
+    mode: '0644'
+  notify: Restart ExpenseTracker
+
+- name: Configure ExpenseTracker systemd service
+  ansible.builtin.template:
+    src: expense-tracker.service.j2
+    dest: /etc/systemd/system/expense-tracker.service
+    mode: '0644'
+  notify: Restart ExpenseTracker
+
+- name: Enable and start ExpenseTracker
+  ansible.builtin.systemd:
+    name: expense-tracker
+    enabled: yes
+    state: started
+    daemon_reload: yes

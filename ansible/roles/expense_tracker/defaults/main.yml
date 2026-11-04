@@ -1,0 +1,5 @@
+---
+app_name: expense-tracker
+app_port: 8081
+app_directory: /opt/expense-tracker
+app_jar_name: expense_tracker.jar

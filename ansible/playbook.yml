@@ -1,0 +1,8 @@
+---
+- name: Deploy ExpenseTracker Application
+  hosts: expense_tracker
+  become: yes
+
+  roles:
+    - expense_tracker
+

@@ -1,0 +1,6 @@
+---
+- name: Restart ExpenseTracker
+  ansible.builtin.systemd:
+    name: expense-tracker
+    state: restarted
+    daemon_reload: yes
