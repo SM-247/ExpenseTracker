@@ -19,6 +19,17 @@ pipeline {
                 }
             }
         }
+        stage('Test Ansible SSH Connection') {
+    steps {
+        sshagent(credentials: ['ansible-ssh-key']) {
+            sh '''
+                ssh -o StrictHostKeyChecking=no \
+                    dellpruthvi@172.19.124.100 \
+                    "whoami"
+            '''
+        }
+    }
+}
     }
 
     post {
