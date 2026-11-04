@@ -81,26 +81,38 @@ pipeline {
                 }
             }
         }
-
         stage('Verify Deployment') {
-            steps {
-                sshagent(credentials: ['ansible-ssh-key']) {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=accept-new \
-                            $REMOTE_USER@$REMOTE_HOST '
-                                echo "Checking ExpenseTracker service..."
-                                systemctl is-active expense-tracker
+    steps {
+        sshagent(credentials: ['ansible-ssh-key']) {
+            sh '''
+                ssh -o StrictHostKeyChecking=accept-new \
+                    $REMOTE_USER@$REMOTE_HOST '
+                        set -eu
 
-                                echo "Checking application API..."
-                                curl -fsS http://localhost:8081/expenses
+                        echo "Checking ExpenseTracker service..."
+                        systemctl is-active --quiet expense-tracker
 
+                        echo "Waiting for application API..."
+
+                        for i in $(seq 1 30); do
+                            if curl -fsS http://localhost:8081/expenses; then
                                 echo ""
                                 echo "Deployment verification successful!"
-                            '
-                    '''
-                }
-            }
+                                exit 0
+                            fi
+
+                            echo "Waiting for application... attempt $i"
+                            sleep 1
+                        done
+
+                        echo "Application failed to become ready."
+                        exit 1
+                    '
+            '''
         }
+    }
+}
+
     }
 
     post {
