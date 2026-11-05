@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: expense-tracker
+
+spec:
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: expense-tracker
+
+  template:
+    metadata:
+      labels:
+        app: expense-tracker
+
+    spec:
+      containers:
+        - name: expense-tracker
+          image: expense-tracker:1.0
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8080
+
+          readinessProbe:
+            httpGet:
+              path: /expenses
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /expenses
+              port: 8080
+            initialDelaySeconds: 40
+            periodSeconds: 15
